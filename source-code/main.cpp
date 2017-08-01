@@ -1,30 +1,21 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-//#include "SearchEngine.h"
 
 using namespace std;
 
 // Global variables
-int numOfCases = 0;
-int numOfSearchEngines = 0;
-int numOfQueries = 0;
+int numOfCases;
+int numOfSearchEngines;
+int numOfQueries;
 
-bool HandleCollision(string searchEngines[], string queries[], int curSearchEngineIndex, int queryIndex);
+int ChooseSearchEngine(string searchEngines[], string queries[], int startingQueryIndex, int curIndex);
 
 int main()
 {
-  srand(time(NULL));
   string currentSearchEngine = "";
+  int firstOccurence = 0;
   int numOfSwitches = 0;
-  int randomIndex = 0;
-  bool isOptimum = false;
-  int totalSwitches = 0;
-  int num = 0;
   string temp = "";
   stringstream ss;
 
@@ -39,6 +30,9 @@ int main()
 
   for(int i = 1; i <= numOfCases; i++)
   {
+    numOfSwitches = 0;
+    firstOccurence = 0;
+
     // Gets the number of search engines
     getline(cin, temp);
     ss.str(temp);
@@ -53,9 +47,6 @@ int main()
       searchEngines[j] = temp;
       //cout << searchEngines[j] << endl;
     }
-
-    //bool hasOccurred[numOfSearchEngines];
-    //std::fill_n(hasOccurred, numOfSearchEngines, false);
 
     ss.str("");
     ss.clear();
@@ -72,45 +63,49 @@ int main()
       //cout << queries[z] << endl;
     }
 
+    // This loop calculates which optimal search engine to
+    // start off the query processings.
+    int temp = 0;
+    int startingIndex = 0;
     for(int k = 0; k < numOfSearchEngines; k++)
     {
-      numOfSwitches = 0;
-      currentSearchEngine = searchEngines[k];
+      firstOccurence = 0;
       for(int m = 0; m < numOfQueries; m++)
       {
-        //cout << m << endl;
-        if(currentSearchEngine.compare(queries[m]) == 0)
+        if(searchEngines[k].compare(queries[m]) == 0)
         {
-          //cout << m << endl;
-          //cout << "true" << endl;
-          // Collision
-          isOptimum = HandleCollision(searchEngines, queries, k, m);
-          if(isOptimum)
-          {
-            numOfSwitches++;
-            break;
-          }
-          numOfSwitches++;
-
-          /////////////////////////NEED TO WORK ON THIS///////////////////////////////////////
-          randomIndex = rand() % ((numOfSearchEngines - 1) - (k + 1) + 1) + (k + 1);
-          cout << randomIndex << endl;
-          currentSearchEngine = searchEngines[randomIndex];
-          ///////////////////////////////////////////////////////////////////////////////////
+          break;
+        }
+        else
+        {
+          firstOccurence++;
         }
       }
       if(k == 0)
       {
-        totalSwitches = numOfSwitches;
+        temp = firstOccurence;
       }
-      if(numOfSwitches < totalSwitches)
+      else if(firstOccurence > temp)
       {
-        totalSwitches = numOfSwitches;
+        temp = firstOccurence;
+        startingIndex = k;
       }
-      //if(isOptimum) break;
     }
 
-    cout << "Case #" << i << ": " << totalSwitches << endl;
+    bool isMatch = false;
+
+    // Query processing
+    for(int k = 0; k < numOfQueries; k++)
+    {
+      // If there is a Collision
+      if(searchEngines[startingIndex].compare(queries[k]) == 0)
+      {
+        numOfSwitches++;
+        startingIndex = ChooseSearchEngine(searchEngines, queries, k, startingIndex);
+      }
+    }
+
+    cout << "Case #" << i << ": " << numOfSwitches << endl;
     ss.str("");
     ss.clear();
   }
@@ -118,33 +113,39 @@ int main()
   return 0;
 }
 
-bool HandleCollision(string searchEngines[], string queries[], int curSearchEngineIndex, int queryIndex)
+int ChooseSearchEngine(string searchEngines[], string queries[], int startingQueryIndex, int curIndex)
 {
-  bool isMatch = true;
-  for(int j = 0; j < numOfSearchEngines; j++)
+  int temp = 0;
+  int k = 0;
+  int startingIndex = k;
+  int firstOccurence = 0;
+  for(int k = 0; k < numOfSearchEngines; k++)
   {
-    if(j == curSearchEngineIndex)
+    if(k == curIndex)
     {
-      //j++;
       continue;
     }
-    for(int i = queryIndex + 1; i < numOfQueries; i++)
+    firstOccurence = 0;
+    for(int m = startingQueryIndex; m < numOfQueries; m++)
     {
-      if(queries[i].compare(searchEngines[j]) == 0)
+      if(searchEngines[k].compare(queries[m]) == 0)
       {
-        isMatch = true;
         break;
       }
       else
       {
-        isMatch = false;
+        firstOccurence++;
       }
     }
-
-    if(!isMatch)
+    if(k == 0)
     {
-      return true;
+      temp = firstOccurence;
+    }
+    else if(firstOccurence > temp)
+    {
+      temp = firstOccurence;
+      startingIndex = k;
     }
   }
-  return false;
+  return startingIndex;
 }
