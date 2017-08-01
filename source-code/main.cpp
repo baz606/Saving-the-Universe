@@ -23,13 +23,12 @@ int main()
   getline(cin, temp);
   ss.str(temp);
   ss >> numOfCases;
-
-  // Resets the string stream
-  ss.str("");
-  ss.clear();
-
+  
   for(int i = 1; i <= numOfCases; i++)
   {
+    ss.str("");
+    ss.clear();
+    
     numOfSwitches = 0;
     firstOccurence = 0;
 
@@ -106,8 +105,6 @@ int main()
     }
 
     cout << "Case #" << i << ": " << numOfSwitches << endl;
-    ss.str("");
-    ss.clear();
   }
 
   return 0;
